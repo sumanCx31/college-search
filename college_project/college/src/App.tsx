@@ -1,9 +1,6 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, GraduationCap, ChevronRight, X, Building2 } from 'lucide-react';
-import { Navbar } from './component/navbar';
+import { useState } from 'react';
+import { BookOpen, GraduationCap, Building2 } from 'lucide-react';
 import { Hero } from './component/hero';
-import { Footer } from './component/footer';
 
 const faculties = [
   { id: 1, name: 'Engineering', desc: 'Cutting-edge innovation.', icon: <Building2 />, colleges: ['Institute of Tech', 'Robotics Lab'] },
