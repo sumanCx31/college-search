@@ -7,6 +7,7 @@ import {
   Upload 
 } from "lucide-react";
 import { toast } from "sonner";
+import { API_URL } from "../../config/config"; // Import the API_URL constant
 
 export default function AdminAddFacultyPage() {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ export default function AdminAddFacultyPage() {
         data.append("image", imageFile);
       }
 
-      await axios.post("http://localhost:8005/api/v1/faculty", data, {
+      await axios.post(`${API_URL}/faculty`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

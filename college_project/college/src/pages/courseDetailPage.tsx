@@ -12,6 +12,7 @@ import {
   Sparkles,
   Layers
 } from "lucide-react";
+import { API_URL } from "../config/config"; // Import the API_URL constant
 
 export default function CourseDetailsPage() {
   const { courseId } = useParams();
@@ -26,7 +27,7 @@ export default function CourseDetailsPage() {
 
     const fetchCourse = async () => {
       try {
-        const url = `http://localhost:8005/api/v1/course/${courseId}`;
+        const url = `${API_URL}/course/${courseId}`;
         console.log("Fetching:", url);
 
         const res = await axios.get(url);

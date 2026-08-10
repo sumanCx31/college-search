@@ -1,15 +1,68 @@
+import { useState, useEffect } from "react";
+import axios from "axios";
 import { 
   Building2, 
   BookOpen, 
   Users, 
-  TrendingUp, 
+  Mail, 
   ArrowUpRight, 
-  GraduationCap, 
-  CheckCircle2, 
-  Clock 
+  Clock, 
+  MessageSquare
 } from "lucide-react";
+import { API_URL } from "../../config/config"; // Import the API_URL constant
 
 export default function AdminDashboardHome() {
+  const [adminName, setAdminName] = useState("Admin");
+  const [stats, setStats] = useState({
+    totalColleges: 0,
+    totalCourses: 0,
+    totalFaculties: 0,
+    totalMessages: 0,
+  });
+  const [messages, setMessages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const token = localStorage.getItem("adminToken");
+        const headers = { Authorization: `Bearer ${token}` };
+
+        // Fetch Admin profile to get username/name from /auth/me response structure
+        try {
+          const profileRes = await axios.get(`${API_URL}/auth/me`, { headers });
+          const profileData = profileRes.data?.data || profileRes.data;
+          const name = profileData?.name || profileData?.username || profileData?.email?.split('@')[0] || "Admin";
+          setAdminName(name);
+        } catch (err) {
+          console.error("Error fetching admin profile:", err);
+        }
+
+        // Fetch Stats
+        const statsRes = await axios.get(`${API_URL}/dashboard/stats`, { headers });
+        const statsData = statsRes.data?.data || statsRes.data;
+        setStats({
+          totalColleges: statsData.totalColleges || 0,
+          totalCourses: statsData.totalCourses || 0,
+          totalFaculties: statsData.totalFaculties || 0,
+          totalMessages: statsData.totalMessages || 0,
+        });
+
+        // Fetch Messages
+        const messagesRes = await axios.get(`${API_URL}/message`, { headers });
+        const allMessages = messagesRes.data?.data || messagesRes.data || [];
+        // Take the 3 recent messages
+        setMessages(allMessages.slice(0, 3));
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
   return (
     <div className="space-y-8">
       
@@ -17,9 +70,9 @@ export default function AdminDashboardHome() {
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-8 text-white shadow-xl shadow-blue-600/20 relative overflow-hidden">
         <div className="absolute right-0 top-0 translate-x-1/4 -translate-y-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10">
-          <h1 className="text-3xl font-extrabold tracking-tight">Welcome back, Admin! 👋</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight">Welcome back, {adminName}! 👋</h1>
           <p className="text-blue-100 text-sm mt-2 max-w-xl">
-            Here's a quick overview of your platform statistics, registered institutions, and active student engagement metrics today.
+            Here's a quick overview of your platform statistics, registered institutions, and recent messages today.
           </p>
         </div>
       </div>
@@ -28,93 +81,64 @@ export default function AdminDashboardHome() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
           title="Total Colleges" 
-          value="24+" 
-          change="+12% this month" 
+          value={loading ? "..." : stats.totalColleges.toString()} 
+          change="Verified" 
           icon={<Building2 size={22} className="text-blue-400" />} 
           bg="bg-blue-500/10" 
           border="border-blue-500/20"
         />
         <StatCard 
           title="Active Courses" 
-          value="48" 
-          change="+4 new added" 
+          value={loading ? "..." : stats.totalCourses.toString()} 
+          change="Available" 
           icon={<BookOpen size={22} className="text-emerald-400" />} 
           bg="bg-emerald-500/10" 
           border="border-emerald-500/20"
         />
         <StatCard 
-          title="Faculty Members" 
-          value="156" 
-          change="Fully verified" 
+          title="Faculty" 
+          value={loading ? "..." : stats.totalFaculties.toString()} 
+          change="Registered" 
           icon={<Users size={22} className="text-amber-400" />} 
           bg="bg-amber-500/10" 
           border="border-amber-500/20"
         />
         <StatCard 
-          title="Platform Visits" 
-          value="12.4K" 
-          change="+18.5% growth" 
-          icon={<TrendingUp size={22} className="text-purple-400" />} 
+          title="Total Messages" 
+          value={loading ? "..." : stats.totalMessages.toString()} 
+          change="Inquiries" 
+          icon={<MessageSquare size={22} className="text-purple-400" />} 
           bg="bg-purple-500/10" 
           border="border-purple-500/20"
         />
       </div>
 
-      {/* Two Column Section (Recent Activities & Quick Actions) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Recent Activities (Span 2) */}
-        <div className="lg:col-span-2 bg-slate-800/60 border border-slate-700/80 rounded-3xl p-6 backdrop-blur-xl">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <Clock size={18} className="text-blue-400" /> Recent Activities
-            </h2>
-            <span className="text-xs font-semibold text-slate-400">Live feed</span>
-          </div>
-
-          <div className="space-y-4">
-            <ActivityItem 
-              title="New college registered" 
-              desc="Pulchowk Campus updated their yearly fee structure." 
-              time="10 mins ago" 
-              icon={<Building2 size={16} className="text-blue-400" />} 
-            />
-            <ActivityItem 
-              title="Course syllabus updated" 
-              desc="B.E. Computer Engineering modified core subject prerequisites." 
-              time="1 hour ago" 
-              icon={<BookOpen size={16} className="text-emerald-400" />} 
-            />
-            <ActivityItem 
-              title="Faculty member verified" 
-              desc="Dr. Ram Sharma approved for Department of Computer Science." 
-              time="3 hours ago" 
-              icon={<CheckCircle2 size={16} className="text-purple-400" />} 
-            />
-          </div>
+      {/* Recent Messages Section */}
+      <div className="bg-slate-800/60 border border-slate-700/80 rounded-3xl p-6 backdrop-blur-xl">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <Clock size={18} className="text-blue-400" /> Recent Messages
+          </h2>
+          <span className="text-xs font-semibold text-slate-400">Latest inquiries</span>
         </div>
 
-        {/* Quick System Summary Card */}
-        <div className="bg-slate-800/60 border border-slate-700/80 rounded-3xl p-6 backdrop-blur-xl flex flex-col justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-white mb-2">System Status</h2>
-            <p className="text-xs text-slate-400 mb-6">All database queries and API endpoints are functioning smoothly.</p>
-            
-            <div className="space-y-4">
-              <SystemStatusRow label="Database Connection" status="Optimal" color="bg-emerald-500" />
-              <SystemStatusRow label="API Response Time" status="42ms" color="bg-blue-500" />
-              <SystemStatusRow label="Storage Capacity" status="34% Used" color="bg-amber-500" />
-            </div>
-          </div>
-
-          <div className="mt-6 pt-4 border-t border-slate-700/60">
-            <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
-              <span>Security Version</span>
-              <span className="text-white">v2.4.0-stable</span>
-            </div>
-          </div>
+        <div className="space-y-4">
+          {loading ? (
+            <p className="text-xs text-slate-400 py-4 text-center">Loading recent messages...</p>
+          ) : messages.length > 0 ? (
+            messages.map((msg: any) => (
+              <ActivityItem 
+                key={msg._id || msg.id}
+                title={msg.name || msg.subject || "User Inquiries"} 
+                desc={msg.message || msg.content || "No message content provided."} 
+                time={msg.createdAt ? new Date(msg.createdAt).toLocaleDateString() : "Recent"} 
+                icon={<Mail size={16} className="text-blue-400" />} 
+              />
+            ))
+          ) : (
+            <p className="text-xs text-slate-400 py-4 text-center">No recent messages found.</p>
+          )}
         </div>
-
       </div>
 
     </div>
@@ -153,18 +177,6 @@ function ActivityItem({ title, desc, time, icon }: { title: string, desc: string
           <span className="text-[11px] text-slate-500 shrink-0">{time}</span>
         </div>
         <p className="text-xs text-slate-400 mt-1 line-clamp-1">{desc}</p>
-      </div>
-    </div>
-  );
-}
-
-function SystemStatusRow({ label, status, color }: { label: string, status: string, color: string }) {
-  return (
-    <div className="flex items-center justify-between text-sm">
-      <span className="text-slate-400 font-medium">{label}</span>
-      <div className="flex items-center gap-2">
-        <span className={`w-2 h-2 rounded-full ${color}`} />
-        <span className="text-white font-bold text-xs">{status}</span>
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ import {
   Edit3, 
   Layers
 } from "lucide-react";
+import { API_URL } from "../../config/config"; // Import the API_URL constant
 import { toast } from "sonner";
 
 export default function AdminCoursesPage() {
@@ -19,7 +20,7 @@ export default function AdminCoursesPage() {
   // Fetch all courses on load
   const fetchCourses = async () => {
     try {
-      const res = await axios.get("http://localhost:8005/api/v1/course");
+      const res = await axios.get(`${API_URL}/course`);
       const data = res.data.data || res.data;
       setCourses(Array.isArray(data) ? data : []);
     } catch (err) {

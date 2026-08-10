@@ -1,15 +1,37 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Mail, Phone, Send } from 'lucide-react';
+import axios from 'axios';
+import { toast } from 'sonner';
+import { API_URL } from '../config/config'; // Import the API_URL constant
 
 export default function ContactPage() {
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('submitting');
-    // Simulate form submission
-    setTimeout(() => setStatus('success'), 1500);
+
+    try {
+      await axios.post(`${API_URL}/message`, formData);
+      setStatus('success');
+      toast.success("Message sent successfully!");
+    } catch (err: any) {
+      console.error("Error submitting message:", err);
+      toast.error(err.response?.data?.message || "Failed to send message. Please try again.");
+      setStatus('idle');
+    }
   };
 
   return (
@@ -63,15 +85,47 @@ export default function ContactPage() {
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <input type="text" placeholder="Name" className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500" required />
-                  <input type="email" placeholder="Email" className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500" required />
+                  <input 
+                    type="text" 
+                    name="name"
+                    placeholder="Name" 
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500" 
+                    required 
+                  />
+                  <input 
+                    type="email" 
+                    name="email"
+                    placeholder="Email" 
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500" 
+                    required 
+                  />
                 </div>
-                <input type="text" placeholder="Subject" className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500" required />
-                <textarea placeholder="Your message..." rows={5} className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
+                <input 
+                  type="text" 
+                  name="subject"
+                  placeholder="Subject" 
+                  value={formData.subject}
+                  onChange={handleInputChange}
+                  className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500" 
+                  required 
+                />
+                <textarea 
+                  name="message"
+                  placeholder="Your message..." 
+                  rows={5} 
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500" 
+                  required
+                ></textarea>
                 <button 
                   type="submit" 
                   disabled={status === 'submitting'}
-                  className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2"
+                  className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {status === 'submitting' ? 'Sending...' : 'Send Message'}
                 </button>

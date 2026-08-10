@@ -6,6 +6,7 @@ import {
   GraduationCap,
   ArrowLeft,
 } from "lucide-react";
+import { API_URL } from "../config/config";
 
 export default function CollegesByCourseId() {
   const { courseId } = useParams();
@@ -17,7 +18,7 @@ export default function CollegesByCourseId() {
     const fetchColleges = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8005/api/v1/college/all-colleges/${courseId}`
+          `${API_URL}/college/all-colleges/${courseId}`
         );
 
         console.log("API Response:", res.data);

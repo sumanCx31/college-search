@@ -75,7 +75,7 @@ export const Hero = () => {
               <Search className="text-slate-400 shrink-0" size={20} />
               <input 
                 type="text" 
-                placeholder="Search colleges, BCA, BSc.CSIT, Engineering..." 
+                placeholder="Search colleges" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-transparent outline-none text-slate-800 placeholder:text-slate-400 text-sm font-medium" 
@@ -83,7 +83,7 @@ export const Hero = () => {
             </div>
 
             {/* Faculty Select Dropdown */}
-            <div className="flex items-center gap-3 px-4 py-3 w-full md:w-52 bg-slate-50/80 rounded-2xl border border-slate-100">
+            {/* <div className="flex items-center gap-3 px-4 py-3 w-full md:w-52 bg-slate-50/80 rounded-2xl border border-slate-100">
               <GraduationCap className="text-slate-400 shrink-0" size={20} />
               <select 
                 value={selectedFaculty}
@@ -96,7 +96,7 @@ export const Hero = () => {
                 <option value="Science">+2 Science</option>
                 <option value="Law">+2 Law</option>
               </select>
-            </div>
+            </div> */}
 
             {/* Submit Button */}
             <button 

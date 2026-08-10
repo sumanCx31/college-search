@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+
 import axios from "axios";
 import { 
   Building2, 
@@ -7,11 +8,12 @@ import {
   BookOpen, 
   Plus, 
   Trash2, 
-  ArrowLeft, 
+  ArrowLeft,
   Upload, 
   Phone 
 } from "lucide-react";
 import { toast } from "sonner";
+import { API_URL } from "../../config/config"; // Import the API_URL constant
 
 export default function AdminAddCollegePage() {
   const navigate = useNavigate();
@@ -45,7 +47,7 @@ export default function AdminAddCollegePage() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await axios.get("http://localhost:8005/api/v1/course");
+        const res = await axios.get(`${API_URL}/course`);
         const data = res.data.data || res.data;
         setCoursesList(Array.isArray(data) ? data : []);
       } catch (err) {

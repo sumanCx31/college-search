@@ -9,6 +9,7 @@ import {
   Layers 
 } from "lucide-react";
 import { toast } from "sonner";
+import { API_URL } from "../../config/config"; // Import the API_URL constant
 
 export default function AdminFacultiesPage() {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ export default function AdminFacultiesPage() {
   // Fetch all faculties on load
   const fetchFaculties = async () => {
     try {
-      const res = await axios.get("http://localhost:8005/api/v1/faculty");
+      const res = await axios.get(`${API_URL}/faculty`);
       const data = res.data.data || res.data;
       setFaculties(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -37,7 +38,7 @@ export default function AdminFacultiesPage() {
     if (!window.confirm("Are you sure you want to delete this faculty?")) return;
     
     try {
-      await axios.delete(`http://localhost:8005/api/v1/faculty/${id}`);
+      await axios.delete(`${API_URL}/faculty/${id}`);
       toast.success("Faculty deleted successfully!");
       setFaculties(faculties.filter((faculty) => (faculty._id || faculty.id) !== id));
     } catch (err: any) {
@@ -58,7 +59,7 @@ export default function AdminFacultiesPage() {
           </button>
           <div>
             <h1 className="text-2xl font-extrabold text-white">Manage Faculties</h1>
-            <p className="text-slate-400 text-xs mt-0.5">API Endpoint: <code>http://localhost:8005/api/v1/faculty</code></p>
+            {/* <p className="text-slate-400 text-xs mt-0.5">API Endpoint: <code>http://localhost:8005/api/v1/faculty</code></p> */}
           </div>
         </div>
 

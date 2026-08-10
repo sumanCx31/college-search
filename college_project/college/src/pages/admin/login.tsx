@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { Lock, Mail, ArrowRight, ShieldCheck } from "lucide-react";
+import { API_URL } from "../../config/config"; // Import the API_URL constant
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -17,18 +18,23 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:8005/api/v1/login", {
+      const res = await axios.post(`${API_URL}/auth/login`, {
         email,
         password,
       });
 
-      // Assuming your API returns a token and stores it in localStorage or cookies
-      if (res.data.token) {
-        localStorage.setItem("adminToken", res.data.token);
+      // Extract tokens from the nested data response
+      if (res.data?.data?.accessToken) {
+        localStorage.setItem("adminToken", res.data.data.accessToken);
+        if (res.data.data.refreshToken) {
+          localStorage.setItem("refreshToken", res.data.data.refreshToken);
+        }
+        
+        // Redirect to admin dashboard
+        navigate("/admin/dashboard");
+      } else {
+        setError("Login successful, but no token received.");
       }
-
-      // Redirect to admin dashboard
-      navigate("/admin/dashboard");
     } catch (err: any) {
       console.error("Login Error:", err);
       setError(err.response?.data?.message || "Invalid email or password. Please try again.");
@@ -38,7 +44,7 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center px-6 relative overflow-hidden font-sans">
       
       {/* Background Glow Design Elements */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />

@@ -3,24 +3,14 @@ import { useNavigate } from "react-router";
 import axios from "axios";
 import { 
   BookOpen, 
-  Layers, 
-  Clock, 
   ArrowLeft, 
   Upload, 
-  CheckSquare
+  CheckSquare,
+  Plus,
+  X
 } from "lucide-react";
 import { toast } from "sonner";
-
-const AVAILABLE_CORE_SUBJECTS = [
-  "English",
-  "Nepali",
-  "Social Studies and Life Skills",
-  "Accountancy",
-  "Economics",
-  "Business Studies",
-  "Computer Science",
-  "Mathematics"
-] as const;
+import {API_URL } from "../../config/config"; // Import the API_URL constant
 
 export default function AdminAddCoursePage() {
   const navigate = useNavigate();
@@ -37,6 +27,7 @@ export default function AdminAddCoursePage() {
     coreSubjects: [] as string[],
   });
 
+  const [subjectInput, setSubjectInput] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -44,7 +35,7 @@ export default function AdminAddCoursePage() {
   useEffect(() => {
     const fetchFaculties = async () => {
       try {
-        const res = await axios.get("http://localhost:8005/api/v1/faculty");
+        const res = await axios.get(`${API_URL}/faculty`);
         const data = res.data.data || res.data;
         setFacultyList(Array.isArray(data) ? data : []);
       } catch (err) {
@@ -60,16 +51,28 @@ export default function AdminAddCoursePage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleCoreSubjectToggle = (subject: string) => {
-    setFormData((prev) => {
-      const exists = prev.coreSubjects.includes(subject);
-      return {
-        ...prev,
-        coreSubjects: exists
-          ? prev.coreSubjects.filter((s) => s !== subject)
-          : [...prev.coreSubjects, subject]
-      };
-    });
+  const handleAddSubject = (e: any) => {
+    e.preventDefault();
+    const trimmed = subjectInput.trim();
+    if (!trimmed) return;
+
+    if (formData.coreSubjects.includes(trimmed)) {
+      toast.error("Subject already added.");
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      coreSubjects: [...prev.coreSubjects, trimmed]
+    }));
+    setSubjectInput("");
+  };
+
+  const handleRemoveSubject = (subjectToRemove: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      coreSubjects: prev.coreSubjects.filter((s) => s !== subjectToRemove)
+    }));
   };
 
   const handleImageChange = (e: any) => {
@@ -87,7 +90,6 @@ export default function AdminAddCoursePage() {
     try {
       const data = new FormData();
 
-      // Append core fields individually or via loop matching schema requirements
       Object.entries(formData).forEach(([key, val]) => {
         if (key === "coreSubjects") {
           (val as string[]).forEach((subject) => {
@@ -98,7 +100,6 @@ export default function AdminAddCoursePage() {
         }
       });
 
-      // Append image file if uploaded
       if (imageFile) {
         data.append("image", imageFile);
       }
@@ -226,32 +227,50 @@ export default function AdminAddCoursePage() {
           </div>
         </div>
 
-        {/* Core Subjects Selection */}
+        {/* Core Subjects Manual Input */}
         <div className="bg-slate-800/60 border border-slate-700/80 rounded-3xl p-6 backdrop-blur-xl space-y-4">
           <h2 className="text-sm font-bold text-blue-400 uppercase tracking-wider flex items-center gap-2">
             <CheckSquare size={16} /> Core Subjects
           </h2>
-          <p className="text-slate-400 text-xs">Select all applicable core subjects for this program:</p>
+          <p className="text-slate-400 text-xs">Type a subject name and click "Add" to include it in the course:</p>
           
-          <div className="flex flex-wrap gap-2">
-            {AVAILABLE_CORE_SUBJECTS.map((subject) => {
-              const isSelected = formData.coreSubjects.includes(subject);
-              return (
-                <button
-                  type="button"
+          <div className="flex gap-2">
+            <input 
+              type="text"
+              placeholder="e.g. Advanced Mathematics"
+              value={subjectInput}
+              onChange={(e) => setSubjectInput(e.target.value)}
+              className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-blue-500"
+            />
+            <button
+              type="button"
+              onClick={handleAddSubject}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-blue-600/20 transition-all"
+            >
+              <Plus size={16} /> Add Subject
+            </button>
+          </div>
+
+          {/* Display Added Subjects Tags */}
+          {formData.coreSubjects.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-2">
+              {formData.coreSubjects.map((subject) => (
+                <span
                   key={subject}
-                  onClick={() => handleCoreSubjectToggle(subject)}
-                  className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
-                    isSelected
-                      ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/20"
-                      : "bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-600"
-                  }`}
+                  className="bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-200 flex items-center gap-2"
                 >
                   {subject}
-                </button>
-              );
-            })}
-          </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveSubject(subject)}
+                    className="text-slate-400 hover:text-red-400 transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Action Buttons */}

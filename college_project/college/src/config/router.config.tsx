@@ -1,4 +1,5 @@
-import { createBrowserRouter, RouterProvider, Outlet } from "react-router";
+import { useEffect } from "react";
+import { createBrowserRouter, RouterProvider, Outlet, useNavigate } from "react-router";
 import { Toaster } from "sonner";
 import { NotFound } from "../component/notFound.tsx";
 
@@ -19,9 +20,12 @@ import AdminDashboardLayout from "../layouts/dashboard.tsx";
 import AdminAddCollegePage from "../pages/admin/addCollege.tsx";
 import AdminCoursesPage from "../pages/admin/course.tsx";
 import AdminAddCoursePage from "../pages/admin/addCourse.tsx";
-// import AdminAddFacultyPage from "../pages/admin/addFaculty.tsx";
 import AdminAddFacultyPage from "../pages/admin/addFaculty.tsx";
 import AdminFacultiesPage from "../pages/admin/faculty.tsx";
+import AdminMessagesPage from "../pages/admin/message.tsx";
+import AdminSettingsPage from "../pages/settings.tsx";
+import MembersPage from "../pages/admin/member.tsx";
+import RegisterUserPage from "../pages/admin/registeredUser.tsx";
 
 const AdminLayout = () => {
   return (
@@ -29,6 +33,24 @@ const AdminLayout = () => {
       <Outlet />
     </div>
   );
+};
+
+// Protected Route Wrapper Component
+const ProtectedRoute = () => {
+  const navigate = useNavigate();
+  const token = localStorage.getItem("adminToken");
+
+  useEffect(() => {
+    if (!token) {
+      navigate("/admin/login", { replace: true });
+    }
+  }, [token, navigate]);
+
+  if (!token) {
+    return null;
+  }
+
+  return <Outlet />;
 };
 
 const routerConfig = createBrowserRouter([
@@ -51,27 +73,34 @@ const routerConfig = createBrowserRouter([
     element: <AdminLayout />,
     children: [
       { path: "login", element: <AdminLoginPage /> },
-      // { path: "dashboard", element: <AdminDashboardLayout /> },
-
     ],
   },
 
-    {
+  // Protected Dashboard Routes
+  {
     path: "/admin/dashboard",
-    element: <AdminDashboardLayout />,
+    element: <ProtectedRoute />,
     children: [
-      { path: "", element: <AdminDashboard /> },
-      {path: "colleges", element: <AdminCollegePage />},
-      {path: "colleges/add", element: <AdminAddCollegePage />},
-      {path: "courses", element: <AdminCoursesPage />},
-      {path: "courses/add", element: <AdminAddCoursePage />},
-      {path: "faculty", element: <AdminFacultiesPage />},
-      {path: "faculties/add", element: <AdminAddFacultyPage />},
+      {
+        element: <AdminDashboardLayout />,
+        children: [
+          { path: "", element: <AdminDashboard /> },
+          { path: "colleges", element: <AdminCollegePage /> },
+          { path: "colleges/add", element: <AdminAddCollegePage /> },
+          { path: "courses", element: <AdminCoursesPage /> },
+          { path: "courses/add", element: <AdminAddCoursePage /> },
+          { path: "faculty", element: <AdminFacultiesPage /> },
+          { path: "faculties/add", element: <AdminAddFacultyPage /> },
+          { path: "messages", element: <AdminMessagesPage /> },
+          { path: "members", element: <MembersPage/> },
+          { path: "members/register", element: <RegisterUserPage/> },
+          { path: "settings", element: <AdminSettingsPage /> },
+        ],
+      },
     ],
   },
- 
 
-  // 3. 404 NOT FOUND ROUTE
+  // 404 NOT FOUND ROUTE
   {
     path: "*",
     element: <NotFound />,

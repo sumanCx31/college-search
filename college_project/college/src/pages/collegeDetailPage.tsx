@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { MapPin, ArrowLeft, Star, Phone, Globe, Mail, BookOpen, Trophy, Info, ChevronRight } from 'lucide-react';
+import { API_URL } from '../config/config';
 
 export default function CollegeDetailsPage() {
   const { collegeId } = useParams();
@@ -15,11 +16,11 @@ export default function CollegeDetailsPage() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:8005/api/v1/college/${collegeId}`);
+        const res = await axios.get(`${API_URL}/college/${collegeId}`);
         const data = res.data.data;
         setCollege(data);
         if (data?.courses?.length > 0) {
-          const promises = data.courses.map((c: any) => axios.get(`http://localhost:8005/api/v1/course/${c.course}`));
+          const promises = data.courses.map((c: any) => axios.get(`${API_URL}/course/${c.course}`));
           const results = await Promise.all(promises);
           setCourses(results.map(r => r.data.data));
         }

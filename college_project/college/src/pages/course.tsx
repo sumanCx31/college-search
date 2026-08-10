@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, Search, BookOpen, Layers, Building, ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../config/config";
 
 interface Course {
   _id: string;
@@ -29,7 +30,7 @@ export default function CoursePage() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await fetch("http://localhost:8005/api/v1/course");
+        const response = await fetch(`${API_URL}/course`);
         const result = await response.json();
         if (result.success) setCourses(result.data);
       } catch (err) {

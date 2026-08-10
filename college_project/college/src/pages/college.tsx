@@ -2,17 +2,22 @@ import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, ArrowRight, Search, Star, Building2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { API_URL } from '../config/config';
 
 export default function CollegesPage() {
   const [colleges, setColleges] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('All');
+  
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Read search query from URL params (e.g., ?search=Kathford)
+  const searchQuery = searchParams.get('search') || '';
 
   useEffect(() => {
-    axios.get('http://localhost:8005/api/v1/college')
+    axios.get(`${API_URL}/college`)
       .then(res => { 
         setColleges(res.data.data); 
         setLoading(false); 
@@ -23,20 +28,30 @@ export default function CollegesPage() {
       });
   }, []);
 
+  // Update URL search params when user types in search bar
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value) {
+      setSearchParams({ search: value });
+    } else {
+      setSearchParams({});
+    }
+  };
+
   // Extract unique locations for filtering
   const locations = useMemo(() => {
     return ['All', ...Array.from(new Set(colleges.map(c => c.location).filter(Boolean)))];
   }, [colleges]);
 
-  // Filter colleges based on search query and location
+  // Filter colleges based on URL search query and location
   const filteredColleges = useMemo(() => {
     return colleges.filter(college => {
-      const matchesSearch = college.name.toLowerCase().includes(search.toLowerCase()) ||
-                            college.location?.toLowerCase().includes(search.toLowerCase());
+      const matchesSearch = college.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            college.location?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesLocation = selectedLocation === 'All' || college.location === selectedLocation;
       return matchesSearch && matchesLocation;
     });
-  }, [colleges, search, selectedLocation]);
+  }, [colleges, searchQuery, selectedLocation]);
 
   if (loading) {
     return (
@@ -69,8 +84,8 @@ export default function CollegesPage() {
             <input 
               type="text"
               placeholder="Search colleges by name or location..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchQuery}
+              onChange={handleSearchChange}
               className="w-full bg-white pl-12 pr-4 py-3.5 rounded-2xl border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-slate-800"
             />
           </div>
