@@ -20,7 +20,7 @@ const collegeSchema = new mongoose.Schema(
           required: true,
         },
 
-        semesterFee: {
+        yearly: {
           type: Number,
           required: true,
         },

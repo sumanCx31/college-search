@@ -1,9 +1,17 @@
+const cloudinarySvc = require("../../services/cloudinary.service");
 const courseSvc = require("./course.service");
 
 class CourseController {
   createCourse = async (req, res, next) => {
     try {
-      const course = await courseSvc.store(req.body);
+      const data = req.body;
+      if (req.file && req.file.path) {
+        data.image = await cloudinarySvc.fileUpload(req.file.path, "/banner/");
+      } else {
+        data.image = null; // or keep old/default image if needed
+      }
+
+      const course = await courseSvc.store(data);
 
       res.status(201).json({
         success: true,
@@ -43,9 +51,7 @@ class CourseController {
 
   getCoursesByFaculty = async (req, res, next) => {
     try {
-      const data = await courseSvc.getByFaculty(
-        req.params.facultyId
-      );
+      const data = await courseSvc.getByFaculty(req.params.facultyId);
 
       res.json({
         success: true,
@@ -58,10 +64,7 @@ class CourseController {
 
   updateCourse = async (req, res, next) => {
     try {
-      const data = await courseSvc.update(
-        req.params.id,
-        req.body
-      );
+      const data = await courseSvc.update(req.params.id, req.body);
 
       res.json({
         success: true,

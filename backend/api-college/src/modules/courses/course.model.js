@@ -22,10 +22,15 @@ const courseSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    image: {
+      publicId: String,
+      secureUrl: String,
+      optimizedUrl: String,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 module.exports = mongoose.model("Course", courseSchema);

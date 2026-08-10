@@ -9,6 +9,12 @@ const facultySchema = new mongoose.Schema(
       unique: true,
     },
 
+    image: {
+      publicId: String,
+      secureUrl: String,
+      optimizedUrl: String,
+    },
+
     description: {
       type: String,
       required: true,
@@ -29,7 +35,7 @@ const facultySchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 module.exports = mongoose.model("Faculty", facultySchema);
