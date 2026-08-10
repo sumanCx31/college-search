@@ -4,7 +4,7 @@ const app = require("./src/config/express.config");
 const server = http.createServer(app);
 
 const PORT = 8005;
-const HOST = "127.0.0.1";
+const HOST = "0.0.0.0";
 
 server.listen(PORT, HOST, (err) => {
   if (!err) {
