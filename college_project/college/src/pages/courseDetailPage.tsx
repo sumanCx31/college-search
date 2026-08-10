@@ -12,7 +12,7 @@ import {
   Sparkles,
   Layers
 } from "lucide-react";
-import { API_URL } from "../config/config"; // Import the API_URL constant
+import { API_URL } from "../config/config";
 
 export default function CourseDetailsPage() {
   const { courseId } = useParams();
@@ -78,7 +78,6 @@ export default function CourseDetailsPage() {
     );
   };
 
-  // Safe parsing of coreSubjects based on API structure
   const parsedSubjects: string[] = (course.coreSubjects || []).flatMap((subj: any) => {
     if (typeof subj === "string") {
       try {
@@ -99,12 +98,16 @@ export default function CourseDetailsPage() {
     return [];
   });
 
-  const hasImages = course.images && course.images.length > 0;
+  // Check both course.images and course.image for media rendering
+  const imagesList = course.images && course.images.length > 0 
+    ? course.images 
+    : course.image ? [course.image] : [];
+  
+  const hasImages = imagesList.length > 0;
 
   return (
     <div className="min-h-screen bg-slate-50 py-16 px-6 mt-10">
       <div className="max-w-7xl mx-auto">
-        {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 mb-8 text-blue-600 font-semibold hover:text-blue-700 transition group"
@@ -115,10 +118,7 @@ export default function CourseDetailsPage() {
           Back to Courses
         </button>
 
-        {/* Dynamic Layout: If images exist, use two-column layout. If images are empty, center or stretch description neatly */}
         <div className={`grid ${hasImages ? 'lg:grid-cols-2' : 'grid-cols-1 max-w-4xl mx-auto'} gap-12 items-start`}>
-          
-          {/* Left Column: Course Text Info */}
           <div>
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -152,7 +152,6 @@ export default function CourseDetailsPage() {
               {course.description}
             </p>
 
-            {/* Core Subjects Section */}
             <div className="mt-10">
               <h2 className="text-2xl font-bold mb-5 flex items-center gap-2.5 text-slate-900">
                 <Layers size={22} className="text-blue-600" />
@@ -178,7 +177,6 @@ export default function CourseDetailsPage() {
               )}
             </div>
 
-            {/* Action to View Colleges Offering This Course */}
             <div className="mt-10">
               <button
                 onClick={() => navigate(`/course/${course._id}`)}
@@ -189,31 +187,28 @@ export default function CourseDetailsPage() {
             </div>
           </div>
 
-          {/* Right Column: Syllabus Viewer / Images Carousel (Only renders if images exist) */}
           {hasImages && (
             <div>
               <div className="mb-5">
                 <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
                   <BookOpen className="text-blue-600" size={28} />
-                  Course Syllabus
+                  Course Preview / Syllabus
                 </h2>
                 <p className="text-slate-500 mt-1 text-sm">
-                  Preview the official syllabus pages of this course.
+                  Preview official resources or syllabus pages for this course.
                 </p>
               </div>
 
               <div className="relative group">
-                {/* Larger Image Container */}
                 <div className="rounded-3xl h-[400px] md:h-[550px] lg:h-[700px] w-full bg-white border border-slate-200 flex items-center justify-center overflow-hidden shadow-xl p-2">
                   <img
-                    src={course.images[currentImg].secureUrl}
+                    src={imagesList[currentImg].secureUrl}
                     alt={`${course.name} ${currentImg + 1}`}
                     className="w-full h-full object-contain transition-all duration-300 rounded-2xl"
                   />
                 </div>
 
-                {/* Previous Button */}
-                {course.images.length > 1 && (
+                {imagesList.length > 1 && (
                   <>
                     <button
                       onClick={prevImg}
@@ -223,7 +218,6 @@ export default function CourseDetailsPage() {
                       <ChevronLeft size={24} />
                     </button>
 
-                    {/* Next Button */}
                     <button
                       onClick={nextImg}
                       className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-slate-800 shadow-xl rounded-full p-3.5 transition backdrop-blur-md"
@@ -232,14 +226,12 @@ export default function CourseDetailsPage() {
                       <ChevronRight size={24} />
                     </button>
 
-                    {/* Image Counter */}
                     <div className="absolute top-4 right-4 bg-slate-900/80 text-white px-3.5 py-1.5 rounded-full text-xs font-bold backdrop-blur-md">
-                      {currentImg + 1} / {course.images.length}
+                      {currentImg + 1} / {imagesList.length}
                     </div>
 
-                    {/* Dots Indicator */}
                     <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
-                      {course.images.map((_: any, i: number) => (
+                      {imagesList.map((_: any, i: number) => (
                         <button
                           key={i}
                           onClick={() => setCurrentImg(i)}
@@ -257,7 +249,6 @@ export default function CourseDetailsPage() {
               </div>
             </div>
           )}
-
         </div>
       </div>
     </div>
