@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_APP_API_URL,
+  baseURL: import.meta.env.VITE_APP_API_URL || "https://college-search-1.onrender.com/api/v1",
   timeout: 30000,
   timeoutErrorMessage: "Server timed out...",
   responseType: "json",
