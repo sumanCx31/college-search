@@ -4,7 +4,6 @@ import { useNavigate } from "react-router";
 import axios from "axios";
 import { 
   Building2, 
-  MapPin, 
   BookOpen, 
   Plus, 
   Trash2, 

@@ -5,8 +5,7 @@ import {
   BookOpen, 
   Plus, 
   Trash2, 
-  ArrowLeft, 
-  Edit3, 
+  ArrowLeft,  
   Layers
 } from "lucide-react";
 import { API_URL } from "../../config/config"; // Import the API_URL constant

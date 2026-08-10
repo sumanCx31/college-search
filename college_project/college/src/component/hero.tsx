@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, MapPin, GraduationCap, ArrowRight, Sparkles, Building2, BookOpen } from 'lucide-react';
+import { Search, MapPin, ArrowRight, Sparkles, Building2, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const Hero = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFaculty, setSelectedFaculty] = useState('All');
   const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {

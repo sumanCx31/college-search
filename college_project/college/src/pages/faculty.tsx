@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, Mail,  FileText, ChevronRight } from 'lucide-react';
+import { Search, Mail,  FileText } from 'lucide-react';
 
 const faculties = [
   { id: 1, name: "Dr. Anish Shrestha", title: "Dean of Engineering", dept: "Engineering", img: "/avatar1.jpg" },
@@ -58,7 +58,7 @@ export default function FacultyPage() {
               >
                 <div className="h-48 w-48 mx-auto rounded-full bg-slate-200 mb-6 overflow-hidden">
                     {/* Placeholder for image */}
-                    <div className="w-full h-full bg-gradient-to-tr from-blue-100 to-emerald-100" />
+                    <div className="w-full h-full bg-linear-to-tr from-blue-100 to-emerald-100" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 text-center">{member.name}</h3>
                 <p className="text-blue-600 text-sm font-semibold text-center mb-1">{member.title}</p>

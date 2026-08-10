@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion, type Variants } from 'framer-motion';
 import { Target, Users, BookOpen, ShieldCheck, ArrowRight, Award, Compass, HeartHandshake } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
