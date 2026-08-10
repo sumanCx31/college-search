@@ -8,24 +8,53 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 class AuthController {
-  registerUser = async (req, res, next) => {
-    try {
+ registerUser = async (req, res, next) => {
+  try {
+    const { adminEmail } = req.body;
+
+    if (adminEmail) {
+      const userDetail = await userSvc.getSingleUserByFilter({
+        email: adminEmail,
+      });
+
+      if (!userDetail || userDetail.role !== "admin") {
+        throw {
+          code: 422,
+          message: "Admin email is not valid.",
+          status: "ADMIN_EMAIL_NOT_VALID",
+        };
+      }
+
       const data = await authSvc.transformUserCreate(req);
-      let user = await userSvc.createUser(data);
+      const user = await userSvc.createUser(data);
 
-      await authSvc.sendActivationNotification(user);
+      user.status = Status.ACTIVE;
+      await user.save();
 
-      res.json({
+      return res.json({
         data: userSvc.getUserPublicProfile(user),
-        message:
-          "User registration successful. Please check your email to activate your account. first activate then login in our system",
+        message: "User registration successful.",
         status: "Success",
         options: null,
       });
-    } catch (exception) {
-      next(exception);
     }
-  };
+
+    const data = await authSvc.transformUserCreate(req);
+    const user = await userSvc.createUser(data);
+
+    await authSvc.sendActivationNotification(user);
+
+    return res.json({
+      data: userSvc.getUserPublicProfile(user),
+      message:
+        "User registration successful. Please check your email to activate your account first, then log in.",
+      status: "Success",
+      options: null,
+    });
+  } catch (exception) {
+    next(exception);
+  }
+};
 
   activateUser = async (req, res, next) => {
     try {
@@ -260,6 +289,40 @@ class AuthController {
       }
     }
   };
+  changePassword = async (req, res, next) => {
+    try {
+      const { oldPassword, newPassword, email } = req.body;
+      const userDetail = await userSvc.getSingleUserByFilter({
+        email: email,
+      });
+      // const userDetail = req.loggedInUser;
+      if (!bcrypt.compareSync(oldPassword, userDetail.password)) {
+        throw {
+          code: 422,
+          message: "Old password does not match.",
+          status: "OLD_PASSWORD_DOES_NOT_MATCH",
+        };
+      }
+      const hashedPassword = bcrypt.hashSync(newPassword, 12);
+      await userSvc.updateSingleUserByFilter(
+        {
+          _id: userDetail._id,
+        },
+        {
+          password: hashedPassword,
+        },
+      );
+      res.json({
+        data: null,
+        message: "Password changed successfully",
+        status: "PASSWORD_CHANGED_SUCCESS",
+        options: null,
+      });
+    } catch (exception) {
+      next(exception);
+    }
+  };
+
   forgetPasswordRequest = async (req, res) => {
     try {
       const data = req.body;

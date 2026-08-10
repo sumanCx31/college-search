@@ -34,7 +34,7 @@ class EmailService {
     try {
       const payload = {
         from: "onboarding@resend.dev", 
-        to:"bishwoshah.it@gmail.com",
+        to:"sumansah029@gmail.com",
         subject: sub,
         html: msg,
       };

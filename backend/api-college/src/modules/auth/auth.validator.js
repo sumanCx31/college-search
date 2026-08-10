@@ -9,13 +9,11 @@ const RegisterDTO = Joi.object({
     password: PasswordDTO,
     confirmPassword: Joi.string().equal(Joi.ref("password")).required(),
     phone: Joi.string().max(21).allow(null, '').optional().default(null),
-    address: Joi.object({
-        billingAddress: Joi.string().max(100).allow(null, " ").default(null),
-        shippingAddress: Joi.string().max(100).allow(null, " ").default(null)
-    }).allow(null, "").default(null),
-    role: Joi.string().regex(/^(customer|admin|kitchen|delivery)$/).default("customer"),
+    address: Joi.string().allow(null, '').optional().default(null),
+    role: Joi.string().regex(/^(teacher|admin)$/).default("customer"),
     gender: Joi.string().regex(/^(male|female|other)$/).optional().default(null),
-    image: Joi.string().allow(null, "").optional().default(null)
+    image: Joi.string().allow(null, "").optional().default(null),
+    adminEmail: Joi.string().email().allow(null, "").optional().default(null),
 })
 
 const LoginDTO = Joi.object({

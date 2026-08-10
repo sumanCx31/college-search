@@ -2,7 +2,9 @@ const router = require("express").Router()
 const authRouter = require("../modules/auth/auth.router");
 const collegeRouter = require("../modules/colleges/college.route");
 const courseRouter = require("../modules/courses/course.route");
+const dashboardRouter = require("../modules/dashboard/dashboard.route");
 const facultyRouter = require("../modules/faculty/faculty.route");
+const messageRouter = require("../modules/message/message.route");
 router.get("/", (req, res, next) => {
     res.json({
         data: "Welcome to College Finding Application",
@@ -16,5 +18,7 @@ router.use("/auth", authRouter);
 router.use("/college", collegeRouter);
 router.use("/course", courseRouter);
 router.use("/faculty", facultyRouter);
+router.use("/message", messageRouter);
+router.use("/dashboard", dashboardRouter);
 
 module.exports = router;

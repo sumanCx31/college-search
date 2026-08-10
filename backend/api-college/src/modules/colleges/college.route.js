@@ -21,6 +21,8 @@ collegeRouter.get("/", collegeController.getAllColleges);
 
 collegeRouter.get("/:id", collegeController.getCollegeByCollegeId);
 
+collegeRouter.get("/all-colleges/:courseId", collegeController.getAllCollegesWithCourseId);
+
 collegeRouter.get(
   "/faculty/:faculty",
   collegeController.getCollegesByFacultyId

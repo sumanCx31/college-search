@@ -12,9 +12,9 @@ class AuthService {
   async transformUserCreate(req) {
     try {
       const data = req.body;
-      // if (req.file) {
-      //   data.image = await cloudinarySvc.fileUpload(req.file.path, "/user/");
-      // }
+      if (req.file) {
+        data.image = await cloudinarySvc.fileUpload(req.file.path, "/user/");
+      }
       data.password = bcrypt.hashSync(data.password, 12);
       data.status = Status.INACTIVE;
       data.activationToken = randomStringGenerator(6) 

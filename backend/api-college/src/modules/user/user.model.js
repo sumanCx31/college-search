@@ -29,8 +29,10 @@ const UserSchema = new mongoose.Schema({
     default: Status.INACTIVE,
   },
   address: {
-    billingAddress: String,
-    shippingAddress: String,
+  type: String,
+  },
+  adminEmail: {
+    type: String,
   },
   phone: {
     type: String,

@@ -57,6 +57,23 @@ class CollegeController {
     }
   };
 
+getAllCollegesWithCourseId = async (req, res, next) => {
+    try {
+      const { courseId } = req.params;
+      
+      // Query using 'courses.course' because courses is an array of subdocuments
+      const colleges = await College.find({ "courses.course": courseId });
+      
+      res.status(200).json({
+        success: true,
+        count: colleges.length,
+        data: colleges,
+      });
+    } catch (exception) {
+      next(exception);
+    }
+  };
+
   // Get Colleges By Faculty
   getCollegesByFacultyId = async (req, res, next) => {
     try {

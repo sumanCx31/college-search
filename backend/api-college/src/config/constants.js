@@ -6,8 +6,6 @@ const Status = {
 const USER_ROLES = {
    ADMIN: 'admin',
    TEACHER:'teacher' ,
-   KITCHEN: 'kitchen',
-   DELIVERY:'delivery'
 }
 
 const GENDER = {
