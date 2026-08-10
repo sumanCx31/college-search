@@ -104,7 +104,7 @@ export default function AdminAddCoursePage() {
         data.append("image", imageFile);
       }
 
-      await axios.post("http://localhost:8005/api/v1/course", data, {
+      await axios.post(`${API_URL}/course`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -129,7 +129,7 @@ export default function AdminAddCoursePage() {
         </button>
         <div>
           <h1 className="text-2xl font-extrabold text-white">Create Course</h1>
-          <p className="text-slate-400 text-xs mt-0.5">Submit to <code>http://localhost:8005/api/v1/course</code></p>
+          {/* <p className="text-slate-400 text-xs mt-0.5">Submit to <code>{API_URL}/course</code></p> */}
         </div>
       </div>
 
