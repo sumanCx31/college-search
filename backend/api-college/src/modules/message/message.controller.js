@@ -27,6 +27,19 @@ class MessageController {
       throw exception;
     }
 }
+
+deleteMessage = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedMessage = await messageModel.findByIdAndDelete(id);
+        if (!deletedMessage) {
+            return res.status(404).json({ message: "Message not found" });
+        }
+        res.status(200).json({ message: "Message deleted successfully" });
+    } catch (exception) {
+      throw exception;
+    }
+}
 }
 
 const msgcltr = new MessageController();
