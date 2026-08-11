@@ -9,30 +9,82 @@ const {
   createCollegeSchema,
   updateCollegeSchema,
 } = require("./college.validator");
+
 const uploader = require("../../middlewares/uploader.middleware");
+
+
+// =====================================================
+// CREATE COLLEGE
+// =====================================================
 
 collegeRouter.post(
   "/",
-//   validator(createCollegeSchema),
-  uploader().single("image"),
+  // validator(createCollegeSchema),
+  uploader("image").single("image"),
   collegeController.createCollege
 );
-collegeRouter.get("/", collegeController.getAllColleges);
 
-collegeRouter.get("/:id", collegeController.getCollegeByCollegeId);
 
-collegeRouter.get("/all-colleges/:courseId", collegeController.getAllCollegesWithCourseId);
+// =====================================================
+// GET ALL COLLEGES
+// =====================================================
+
+collegeRouter.get(
+  "/",
+  collegeController.getAllColleges
+);
+
+
+// =====================================================
+// GET COLLEGES BY COURSE
+// IMPORTANT: Keep this BEFORE /:id
+// =====================================================
+
+collegeRouter.get(
+  "/all-colleges/:courseId",
+  collegeController.getAllCollegesWithCourseId
+);
+
+
+// =====================================================
+// GET COLLEGES BY FACULTY
+// =====================================================
 
 collegeRouter.get(
   "/faculty/:faculty",
   collegeController.getCollegesByFacultyId
 );
 
-// collegeRouter.put(
-//   "/:id",
-//   validator(updateCollegeSchema),
-//   collegeController.updateCollege
-// );
-// collegeRouter.delete("/:id", collegeController.deleteCollege);
+
+// =====================================================
+// GET SINGLE COLLEGE BY ID
+// =====================================================
+
+collegeRouter.get(
+  "/:id",
+  collegeController.getCollegeByCollegeId
+);
+
+
+// =====================================================
+// UPDATE COLLEGE
+// =====================================================
+
+collegeRouter.put(
+  "/:id",
+  // validator(updateCollegeSchema),
+  collegeController.updateCollege
+);
+
+
+// =====================================================
+// DELETE COLLEGE
+// =====================================================
+
+collegeRouter.delete(
+  "/:id",
+  collegeController.deleteCollege
+);
+
 
 module.exports = collegeRouter;

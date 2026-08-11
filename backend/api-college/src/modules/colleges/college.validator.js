@@ -12,6 +12,10 @@ const createCollegeSchema = Joi.object({
 
   feeStructure: Joi.number(),
 
+  phone:Joi.string(),
+  email:Joi.string().email(),
+  website:Joi.string(),
+
   activities: Joi.array().items(Joi.string()),
 
   description: Joi.string().allow("", null),

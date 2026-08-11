@@ -6,6 +6,15 @@ const collegeSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    phone: {
+      type: String,
+    },
+    email: {
+      type: String,
+    },
+    website: {
+      type: String,
+    },
 
     courses: [
       {
@@ -43,6 +52,11 @@ const collegeSchema = new mongoose.Schema(
     },
 
     activities: [
+      {
+        type: String,
+      },
+    ],
+    facilities: [
       {
         type: String,
       },
