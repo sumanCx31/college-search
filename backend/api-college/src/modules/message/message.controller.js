@@ -35,7 +35,7 @@ deleteMessage = async (req, res) => {
         if (!deletedMessage) {
             return res.status(404).json({ message: "Message not found" });
         }
-        res.status(200).json({ message: "Message deleted successfully" });
+        res.status(200).json({ message: "Message deleted successfullyyyy" });
     } catch (exception) {
       throw exception;
     }
