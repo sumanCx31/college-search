@@ -128,22 +128,20 @@ export default function CollegeDetailsPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {college.contact && (
-              <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
-                <h2 className="text-xl font-bold mb-6">Contact Details</h2>
-                <div className="space-y-4">
-                  {college.contact.phone && (
-                    <a href={`tel:${college.contact.phone}`} className="flex items-center gap-3 opacity-90 hover:opacity-100 transition"><Phone size={18} className="text-blue-400 shrink-0" /> {college.contact.phone}</a>
-                  )}
-                  {college.contact.email && (
-                    <a href={`mailto:${college.contact.email}`} className="flex items-center gap-3 opacity-90 hover:opacity-100 transition truncate"><Mail size={18} className="text-blue-400 shrink-0" /> <span className="truncate">{college.contact.email}</span></a>
-                  )}
-                  {college.contact.website && (
-                    <a href={college.contact.website} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-blue-400 font-bold hover:underline"><Globe size={18} className="shrink-0" /> Visit Official Site <ChevronRight size={16} /></a>
-                  )}
-                </div>
+            <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
+              <h2 className="text-xl font-bold mb-6">Contact Details</h2>
+              <div className="space-y-4">
+                {college.phone && (
+                  <a href={`tel:${college.phone}`} className="flex items-center gap-3 opacity-90 hover:opacity-100 transition"><Phone size={18} className="text-blue-400 shrink-0" /> {college.phone}</a>
+                )}
+                {college.email && (
+                  <a href={`mailto:${college.email}`} className="flex items-center gap-3 opacity-90 hover:opacity-100 transition truncate"><Mail size={18} className="text-blue-400 shrink-0" /> <span className="truncate">{college.email}</span></a>
+                )}
+                {college.website && (
+                  <a href={`https://${college.website}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-blue-400 font-bold hover:underline"><Globe size={18} className="shrink-0" /> Visit Official Site <ChevronRight size={16} /></a>
+                )}
               </div>
-            )}
+            </div>
 
             {college.activities && college.activities.length > 0 && (
               <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
