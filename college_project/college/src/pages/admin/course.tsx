@@ -38,7 +38,7 @@ export default function AdminCoursesPage() {
     if (!window.confirm("Are you sure you want to delete this course?")) return;
     
     try {
-      await axios.delete(`http://localhost:8005/api/v1/course/${id}`);
+      await axios.delete(`${API_URL}/course/${id}`);
       toast.success("Course deleted successfully!");
       setCourses(courses.filter((course) => (course._id || course.id) !== id));
     } catch (err: any) {
@@ -59,7 +59,7 @@ export default function AdminCoursesPage() {
           </button>
           <div>
             <h1 className="text-2xl font-extrabold text-white">Manage Courses</h1>
-            <p className="text-slate-400 text-xs mt-0.5">API Endpoint: <code>http://localhost:8005/api/v1/course</code></p>
+            {/* <p className="text-slate-400 text-xs mt-0.5">API Endpoint: <code>http://localhost:8005/api/v1/course</code></p> */}
           </div>
         </div>
 
