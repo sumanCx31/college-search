@@ -149,7 +149,7 @@ export default function AdminAddCollegePage() {
         data.append("image", imageFile);
       }
 
-      await axios.post("http://localhost:8005/api/v1/college", data, {
+      await axios.post(`${API_URL}/college`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
