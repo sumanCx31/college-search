@@ -52,7 +52,7 @@ export default function AdminAddFacultyPage() {
       });
 
       toast.success("Faculty created successfully!");
-      navigate("/admin/dashboard/faculties");
+      navigate("/admin/dashboard");
     } catch (err: any) {
       console.error("Error creating faculty:", err);
       toast.error(err.response?.data?.message || "Failed to create faculty via API.");

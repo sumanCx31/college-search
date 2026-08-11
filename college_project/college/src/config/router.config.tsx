@@ -26,6 +26,7 @@ import AdminMessagesPage from "../pages/admin/message.tsx";
 import AdminSettingsPage from "../pages/settings.tsx";
 import MembersPage from "../pages/admin/member.tsx";
 import RegisterUserPage from "../pages/admin/registeredUser.tsx";
+import AdminEditCollegePage from "../pages/admin/editCollege.tsx";
 
 const AdminLayout = () => {
   return (
@@ -87,6 +88,8 @@ const routerConfig = createBrowserRouter([
           { path: "", element: <AdminDashboard /> },
           { path: "colleges", element: <AdminCollegePage /> },
           { path: "colleges/add", element: <AdminAddCollegePage /> },
+          { path: "colleges/edit/:id", element: <AdminEditCollegePage /> },
+          
           { path: "courses", element: <AdminCoursesPage /> },
           { path: "courses/add", element: <AdminAddCoursePage /> },
           { path: "faculty", element: <AdminFacultiesPage /> },

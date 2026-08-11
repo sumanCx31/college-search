@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import axios from "axios";
-import { MapPin, GraduationCap, Plus, Search } from "lucide-react";
+import { MapPin, GraduationCap, Plus, Search, Pencil, Trash2 } from "lucide-react";
 import { API_URL } from "../../config/config"; // Import the API_URL constant
 
 export default function CollegesPage() {
@@ -10,20 +10,34 @@ export default function CollegesPage() {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const fetchColleges = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/college`);
-        const collegeData = res.data.data || res.data;
-        setColleges(Array.isArray(collegeData) ? collegeData : []);
-      } catch (err) {
-        console.error("Error fetching colleges:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchColleges();
   }, []);
+
+  const fetchColleges = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/college`);
+      const collegeData = res.data.data || res.data;
+      setColleges(Array.isArray(collegeData) ? collegeData : []);
+    } catch (err) {
+      console.error("Error fetching colleges:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle Delete College
+  const handleDelete = async (id: string, name: string) => {
+    if (window.confirm(`Are you sure you want to delete ${name}?`)) {
+      try {
+        await axios.delete(`${API_URL}/college/${id}`);
+        // Remove the deleted college from local state to update the UI instantly
+        setColleges(colleges.filter((college) => college._id !== id));
+      } catch (err) {
+        console.error("Error deleting college:", err);
+        alert("Failed to delete the college. Please try again.");
+      }
+    }
+  };
 
   // Filter colleges based on search input
   const filteredColleges = colleges.filter(
@@ -105,9 +119,29 @@ export default function CollegesPage() {
 
                   {/* College Info */}
                   <div className="p-6">
-                    <h2 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-1">
-                      {college.name}
-                    </h2>
+                    <div className="flex items-start justify-between gap-2">
+                      <h2 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-1">
+                        {college.name}
+                      </h2>
+                      
+                      {/* Edit & Delete Action Buttons */}
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Link
+                          to={`/admin/dashboard/colleges/edit/${college._id}`}
+                          className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-800 rounded-xl transition-colors"
+                          title="Edit College"
+                        >
+                          <Pencil size={16} />
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(college._id, college.name)}
+                          className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-xl transition-colors"
+                          title="Delete College"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
 
                     <p className="flex items-center gap-1.5 text-slate-400 text-xs mt-2 font-medium">
                       <MapPin size={14} className="text-blue-400 shrink-0" />
