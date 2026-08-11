@@ -81,9 +81,9 @@ export default function AdminDashboardLayout() {
               whileHover={{ rotate: 10, scale: 1.05 }}
               className="bg-blue-600 text-white px-2.5 py-1 rounded-xl shadow-md shadow-blue-500/20"
             >
-              A
+              J
             </motion.span>
-            <span>cademiaNP</span>
+            <span>igyasa</span>
           </a>
             <p className="text-xs text-slate-400 mt-1">College Portal Management</p>
           </div>
