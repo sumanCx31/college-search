@@ -12,14 +12,14 @@ import {
   Phone 
 } from "lucide-react";
 import { toast } from "sonner";
-import { API_URL } from "../../config/config"; // Import the API_URL constant
+import { API_URL } from "../../config/config";
 
 export default function AdminAddCollegePage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [coursesList, setCoursesList] = useState<any[]>([]);
 
-  // Form state structured with collegeType matching your schema enum & default: []
+  // Form state updated to match the Mongoose schema directly (phone, email, website at root instead of nested contact)
   const [formData, setFormData] = useState({
     name: "",
     location: "",
@@ -27,13 +27,9 @@ export default function AdminAddCollegePage() {
     description: "",
     establishedYear: "",
     rating: "5.0",
-    collegeType: [] as ("+2" | "Bachelor" | "Master" | "MPhil" | "PhD")[],
-    contact: {
-      phone: "",
-      email: "",
-      website: "",
-      address: "",
-    },
+    phone: "",
+    email: "",
+    website: "",
     facilities: [] as string[],
     activities: [] as string[],
   });
@@ -60,25 +56,6 @@ export default function AdminAddCollegePage() {
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleContactChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      contact: { ...prev.contact, [field]: value }
-    }));
-  };
-
-  const handleCollegeTypeToggle = (type: "+2" | "Bachelor" | "Master" | "MPhil" | "PhD") => {
-    setFormData((prev) => {
-      const exists = prev.collegeType.includes(type);
-      return {
-        ...prev,
-        collegeType: exists 
-          ? prev.collegeType.filter((t) => t !== type)
-          : [...prev.collegeType, type]
-      };
-    });
   };
 
   const handleArrayChange = (index: number, value: string, field: "facilities" | "activities") => {
@@ -127,15 +104,13 @@ export default function AdminAddCollegePage() {
     try {
       const data = new FormData();
       
-      // Append core fields properly mapping arrays and objects
+      // Append core fields properly mapping root values, strings, and arrays
       Object.entries(formData).forEach(([key, val]) => {
-        if (key === "collegeType") {
-          // Append each selected type individually so backend/Multer catches them as array items
-          (val as string[]).forEach((type) => {
-            data.append("collegeType", type);
+        if (Array.isArray(val)) {
+          // Append each array item individually so multer/backend receives them properly
+          val.forEach((item) => {
+            data.append(`${key}[]`, item);
           });
-        } else if (typeof val === "object" && val !== null) {
-          data.append(key, JSON.stringify(val));
         } else {
           data.append(key, val as any);
         }
@@ -261,27 +236,6 @@ export default function AdminAddCollegePage() {
             />
           </div>
 
-          {/* College Type Enum Selector */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-300">College Type (Enum Options)</label>
-            <div className="flex flex-wrap gap-2">
-              {(["+2", "Bachelor", "Master", "MPhil", "PhD"] as const).map((type) => (
-                <button
-                  type="button"
-                  key={type}
-                  onClick={() => handleCollegeTypeToggle(type)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                    formData.collegeType.includes(type)
-                      ? "bg-blue-600 border-blue-500 text-white"
-                      : "bg-slate-900 border-slate-700 text-slate-400"
-                  }`}
-                >
-                  {type}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Image Upload */}
           <div className="space-y-2 pt-2">
             <label className="text-xs font-bold text-slate-300">Image</label>
@@ -302,22 +256,18 @@ export default function AdminAddCollegePage() {
           <h2 className="text-sm font-bold text-blue-400 uppercase tracking-wider flex items-center gap-2">
             <Phone size={16} /> Contact Information
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1">
               <label className="text-xs font-bold text-slate-300">Phone</label>
-              <input type="text" placeholder="+977-..." value={formData.contact.phone} onChange={(e) => handleContactChange("phone", e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white outline-none" />
+              <input type="text" name="phone" placeholder="+977-..." value={formData.phone} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white outline-none" />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-bold text-slate-300">Email</label>
-              <input type="email" placeholder="info@college.edu.np" value={formData.contact.email} onChange={(e) => handleContactChange("email", e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white outline-none" />
+              <input type="email" name="email" placeholder="info@college.edu.np" value={formData.email} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white outline-none" />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-bold text-slate-300">Website</label>
-              <input type="text" placeholder="https://" value={formData.contact.website} onChange={(e) => handleContactChange("website", e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white outline-none" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-300">Address</label>
-              <input type="text" placeholder="Street, City" value={formData.contact.address} onChange={(e) => handleContactChange("address", e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white outline-none" />
+              <input type="text" name="website" placeholder="https://" value={formData.website} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white outline-none" />
             </div>
           </div>
         </div>
