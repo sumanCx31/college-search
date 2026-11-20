@@ -211,17 +211,6 @@ export default function AdminAddCollegePage() {
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-blue-500"
               />
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300">Rating</label>
-              <input 
-                type="number" 
-                name="rating" 
-                step="0.1" 
-                value={formData.rating} 
-                onChange={handleInputChange}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-blue-500"
-              />
-            </div>
           </div>
 
           <div className="space-y-1.5">
@@ -239,6 +228,7 @@ export default function AdminAddCollegePage() {
           {/* Image Upload */}
           <div className="space-y-2 pt-2">
             <label className="text-xs font-bold text-slate-300">Image</label>
+            <p className="text-xs text-slate-500">Size must be less than 3 MB</p>
             <div className="flex items-center gap-4">
               <label className="cursor-pointer bg-slate-900 hover:bg-slate-700 border border-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-300 flex items-center gap-2">
                 <Upload size={15} /> Upload Image
