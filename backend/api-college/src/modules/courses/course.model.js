@@ -14,6 +14,10 @@ const courseSchema = new mongoose.Schema(
       trim: true,
     },
 
+    courseUrl: {
+      type: String,
+    },
+
     description: {
       type: String,
     },
@@ -22,6 +26,11 @@ const courseSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    coreSubjects: [
+      {
+        type: String,
+      },
+    ],
     image: {
       publicId: String,
       secureUrl: String,

@@ -7,6 +7,8 @@ const createCourseSchema = Joi.object({
 
   description: Joi.string().allow("", null),
 
+  courseUrl: Joi.string(),
+
   duration: Joi.string().required(),
 });
 
@@ -14,6 +16,8 @@ const updateCourseSchema = Joi.object({
   faculty: Joi.string(),
 
   name: Joi.string(),
+  
+  courseUrl: Joi.string(),
 
   description: Joi.string().allow("", null),
 

@@ -1,37 +1,38 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import axios from "axios";
-import { 
-  BookOpen, 
-  ArrowLeft, 
-  Upload, 
+import {
+  BookOpen,
+  ArrowLeft,
+  Upload,
   CheckSquare,
   Plus,
-  X
+  X,
+  Link2,
+  FileImage,
 } from "lucide-react";
 import { toast } from "sonner";
-import {API_URL } from "../../config/config"; // Import the API_URL constant
+import { API_URL } from "../../config/config";
 
 export default function AdminAddCoursePage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [facultyList, setFacultyList] = useState<any[]>([]);
 
-  // Form state structured to match your course schema fields
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     faculty: "",
     duration: "",
     group: "",
+    courseUrl: "",
     coreSubjects: [] as string[],
   });
 
   const [subjectInput, setSubjectInput] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [syllabusImageFile, setSyllabusImageFile] = useState<File | null>(null);
+  const [syllabusImagePreview, setSyllabusImagePreview] = useState<string | null>(null);
 
-  // Fetch faculty list for dropdown selection
   useEffect(() => {
     const fetchFaculties = async () => {
       try {
@@ -63,7 +64,7 @@ export default function AdminAddCoursePage() {
 
     setFormData((prev) => ({
       ...prev,
-      coreSubjects: [...prev.coreSubjects, trimmed]
+      coreSubjects: [...prev.coreSubjects, trimmed],
     }));
     setSubjectInput("");
   };
@@ -71,15 +72,19 @@ export default function AdminAddCoursePage() {
   const handleRemoveSubject = (subjectToRemove: string) => {
     setFormData((prev) => ({
       ...prev,
-      coreSubjects: prev.coreSubjects.filter((s) => s !== subjectToRemove)
+      coreSubjects: prev.coreSubjects.filter((s) => s !== subjectToRemove),
     }));
   };
 
-  const handleImageChange = (e: any) => {
-    const file = e.target.files[0];
+  const handleSyllabusImageChange = (e: any) => {
+    const file = e.target.files?.[0];
     if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+      if (file.size > 3 * 1024 * 1024) {
+        toast.error("Syllabus image size must be less than 3MB.");
+        return;
+      }
+      setSyllabusImageFile(file);
+      setSyllabusImagePreview(URL.createObjectURL(file));
     }
   };
 
@@ -88,25 +93,57 @@ export default function AdminAddCoursePage() {
     setLoading(true);
 
     try {
-      const data = new FormData();
+      const normalizedSubjects = formData.coreSubjects
+        .map((subject) => subject.trim())
+        .filter(Boolean);
 
-      Object.entries(formData).forEach(([key, val]) => {
-        if (key === "coreSubjects") {
-          (val as string[]).forEach((subject) => {
-            data.append("coreSubjects", subject);
-          });
-        } else {
-          data.append(key, val as any);
+      if (syllabusImageFile) {
+        const data = new FormData();
+        data.append("name", formData.name);
+        data.append("faculty", formData.faculty);
+        data.append("duration", formData.duration);
+
+        if (formData.description.trim()) {
+          data.append("description", formData.description.trim());
         }
-      });
+        if (formData.group.trim()) {
+          data.append("group", formData.group.trim());
+        }
+        if (formData.courseUrl.trim()) {
+          data.append("courseUrl", formData.courseUrl.trim());
+        }
 
-      if (imageFile) {
-        data.append("image", imageFile);
+        normalizedSubjects.forEach((subject) => {
+          data.append("coreSubjects[]", subject);
+        });
+
+        data.append("syllabusImage", syllabusImageFile);
+
+        await axios.post(`${API_URL}/course`, data, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      } else {
+        const payload: Record<string, any> = {
+          name: formData.name.trim(),
+          faculty: formData.faculty,
+          duration: formData.duration.trim(),
+          coreSubjects: normalizedSubjects,
+        };
+
+        if (formData.description.trim()) {
+          payload.description = formData.description.trim();
+        }
+        if (formData.group.trim()) {
+          payload.group = formData.group.trim();
+        }
+        if (formData.courseUrl.trim()) {
+          payload.courseUrl = formData.courseUrl.trim();
+        }
+
+        await axios.post(`${API_URL}/course`, payload, {
+          headers: { "Content-Type": "application/json" },
+        });
       }
-
-      await axios.post(`${API_URL}/course`, data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
 
       toast.success("Course created successfully!");
       navigate("/admin/dashboard/courses");
@@ -121,7 +158,8 @@ export default function AdminAddCoursePage() {
   return (
     <div className="space-y-6 max-w-4xl mx-auto pb-16">
       <div className="flex items-center gap-3">
-        <button 
+        <button
+          type="button"
           onClick={() => navigate(-1)}
           className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors"
         >
@@ -129,7 +167,6 @@ export default function AdminAddCoursePage() {
         </button>
         <div>
           <h1 className="text-2xl font-extrabold text-white">Create Course</h1>
-          {/* <p className="text-slate-400 text-xs mt-0.5">Submit to <code>{API_URL}/course</code></p> */}
         </div>
       </div>
 
@@ -143,12 +180,12 @@ export default function AdminAddCoursePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-300">Course Name *</label>
-              <input 
-                type="text" 
-                name="name" 
+              <input
+                type="text"
+                name="name"
                 required
-                placeholder="e.g. Bachelor of Science in CSIT" 
-                value={formData.name} 
+                placeholder="e.g. +2 Management"
+                value={formData.name}
                 onChange={handleInputChange}
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-blue-500"
               />
@@ -156,7 +193,7 @@ export default function AdminAddCoursePage() {
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-300">Faculty *</label>
-              <select 
+              <select
                 name="faculty"
                 value={formData.faculty}
                 onChange={handleInputChange}
@@ -176,12 +213,12 @@ export default function AdminAddCoursePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-300">Duration *</label>
-              <input 
-                type="text" 
-                name="duration" 
+              <input
+                type="text"
+                name="duration"
                 required
-                placeholder="e.g. 4 Years / 2 Years" 
-                value={formData.duration} 
+                placeholder="e.g. 2 or 4 Years"
+                value={formData.duration}
                 onChange={handleInputChange}
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-blue-500"
               />
@@ -189,11 +226,11 @@ export default function AdminAddCoursePage() {
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-300">Group</label>
-              <input 
-                type="text" 
-                name="group" 
-                placeholder="e.g. Physical / Biological / General" 
-                value={formData.group} 
+              <input
+                type="text"
+                name="group"
+                placeholder="e.g. Physical / Biological / General"
+                value={formData.group}
                 onChange={handleInputChange}
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-blue-500"
               />
@@ -201,27 +238,44 @@ export default function AdminAddCoursePage() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300">Description</label>
-            <textarea 
-              name="description" 
-              rows={3} 
-              placeholder="Enter comprehensive description about the course..." 
-              value={formData.description} 
+            <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <Link2 size={14} className="text-blue-400" /> Course URL <span className="text-slate-500 font-normal">(Optional)</span>
+            </label>
+            <input
+              type="url"
+              name="courseUrl"
+              placeholder="e.g. https://university.edu.np/programs/bsc-csit"
+              value={formData.courseUrl}
               onChange={handleInputChange}
               className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-blue-500"
             />
           </div>
 
-          {/* Image Upload */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-300">Description</label>
+            <textarea
+              name="description"
+              rows={3}
+              placeholder="Enter comprehensive description about the course..."
+              value={formData.description}
+              onChange={handleInputChange}
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-blue-500"
+            />
+          </div>
+
+          {/* Optional Syllabus Image Upload */}
           <div className="space-y-2 pt-2">
-            <label className="text-xs font-bold text-slate-300">Course Image</label>
+            <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <FileImage size={14} className="text-blue-400" /> Syllabus Image <span className="text-slate-500 font-normal">(Optional)</span>
+            </label>
+            <p className="text-slate-400 text-xs">Image Size must be less than 3MB</p>
             <div className="flex items-center gap-4">
               <label className="cursor-pointer bg-slate-900 hover:bg-slate-700 border border-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-300 flex items-center gap-2">
-                <Upload size={15} /> Upload Image
-                <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                <Upload size={15} /> Upload Syllabus
+                <input type="file" accept="image/*" onChange={handleSyllabusImageChange} className="hidden" />
               </label>
-              {imagePreview && (
-                <img src={imagePreview} alt="Preview" className="w-10 h-10 rounded-lg object-cover border border-slate-700" />
+              {syllabusImagePreview && (
+                <img src={syllabusImagePreview} alt="Syllabus Preview" className="w-10 h-10 rounded-lg object-cover border border-slate-700" />
               )}
             </div>
           </div>
@@ -233,11 +287,11 @@ export default function AdminAddCoursePage() {
             <CheckSquare size={16} /> Core Subjects
           </h2>
           <p className="text-slate-400 text-xs">Type a subject name and click "Add" to include it in the course:</p>
-          
+
           <div className="flex gap-2">
-            <input 
+            <input
               type="text"
-              placeholder="e.g. Advanced Mathematics"
+              placeholder="e.g. Account"
               value={subjectInput}
               onChange={(e) => setSubjectInput(e.target.value)}
               className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-blue-500"
@@ -251,7 +305,6 @@ export default function AdminAddCoursePage() {
             </button>
           </div>
 
-          {/* Display Added Subjects Tags */}
           {formData.coreSubjects.length > 0 && (
             <div className="flex flex-wrap gap-2 pt-2">
               {formData.coreSubjects.map((subject) => (
@@ -275,16 +328,16 @@ export default function AdminAddCoursePage() {
 
         {/* Action Buttons */}
         <div className="flex justify-end gap-3 pt-4">
-          <button 
-            type="button" 
-            onClick={() => navigate(-1)} 
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
             className="px-6 py-3 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold hover:bg-slate-700 transition-colors"
           >
             Cancel
           </button>
-          <button 
-            type="submit" 
-            disabled={loading} 
+          <button
+            type="submit"
+            disabled={loading}
             className="px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-lg shadow-blue-600/30 transition-all disabled:opacity-50"
           >
             {loading ? "Creating Course..." : "Create Course"}
