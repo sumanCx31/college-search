@@ -26,6 +26,28 @@ export interface College {
 
 const COLLEGE_API_URL = import.meta.env.VITE_APP_API_URL;
 
+const extractCollegeArray = (payload: any): College[] => {
+  if (Array.isArray(payload)) return payload;
+  if (!payload || typeof payload !== 'object') return [];
+
+  const candidates = [
+    payload.data,
+    payload.colleges,
+    payload.results,
+    payload.data?.colleges,
+    payload.data?.results,
+    payload.data?.data,
+  ];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) {
+      return candidate;
+    }
+  }
+
+  return [];
+};
+
 export const Hero = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [colleges, setColleges] = useState<College[]>([]);
@@ -37,7 +59,6 @@ export const Hero = () => {
   const navigate = useNavigate();
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  // Fetch all colleges from backend 
   useEffect(() => {
     const controller = new AbortController();
 
@@ -45,6 +66,10 @@ export const Hero = () => {
       try {
         setIsLoading(true);
         setError(null);
+
+        if (!COLLEGE_API_URL) {
+          throw new Error('VITE_APP_API_URL is not configured');
+        }
 
         const response = await fetch(COLLEGE_API_URL, {
           method: 'GET',
@@ -59,16 +84,12 @@ export const Hero = () => {
         }
 
         const result = await response.json();
-
-        const extractedColleges: College[] = Array.isArray(result)
-          ? result
-          : result.data || result.colleges || result.results || [];
-
-        setColleges(extractedColleges);
+        setColleges(extractCollegeArray(result));
       } catch (err: any) {
         if (err.name !== 'AbortError') {
           console.error('Error fetching colleges:', err);
           setError('Could not load colleges from server.');
+          setColleges([]);
         }
       } finally {
         if (!controller.signal.aborted) {
@@ -82,13 +103,16 @@ export const Hero = () => {
     return () => controller.abort();
   }, []);
 
-  // Filter colleges dynamically as the user types
+  const safeColleges = Array.isArray(colleges) ? colleges : [];
+
   const suggestions = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    if (!query) return [];
+    if (!query || safeColleges.length === 0) return [];
 
-    return colleges
+    return safeColleges
       .filter((college) => {
+        if (!college || typeof college !== 'object') return false;
+
         const matchName = college.name?.toLowerCase().includes(query);
         const matchLocation = (college.location || college.address)
           ?.toLowerCase()
@@ -102,12 +126,11 @@ export const Hero = () => {
             )
           : false;
 
-        return matchName || matchLocation || matchAffiliation || matchCourses;
+        return Boolean(matchName || matchLocation || matchAffiliation || matchCourses);
       })
       .slice(0, 6);
-  }, [searchQuery, colleges]);
+  }, [searchQuery, safeColleges]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -123,7 +146,6 @@ export const Hero = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Reset highlighted item whenever query changes
   useEffect(() => {
     setActiveIndex(-1);
   }, [searchQuery]);
@@ -168,12 +190,10 @@ export const Hero = () => {
 
   return (
     <section className="relative min-h-[90vh] flex flex-col items-center justify-center bg-slate-50 pt-32 pb-20 px-6 overflow-hidden">
-      {/* Creative Background Glow Elements */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-blue-400/10 to-emerald-400/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-10 right-10 w-72 h-72 bg-blue-500/5 rounded-full blur-[90px] pointer-events-none" />
 
       <div className="max-w-5xl mx-auto text-center relative z-10 w-full">
-        {/* Top Announcement Pill */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -183,7 +203,6 @@ export const Hero = () => {
           <Sparkles size={14} className="text-emerald-500" /> Nepal's Education Hub
         </motion.div>
 
-        {/* Main Hero Headline */}
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -196,7 +215,6 @@ export const Hero = () => {
           </span>
         </motion.h1>
 
-        {/* Subtitle */}
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -206,7 +224,6 @@ export const Hero = () => {
           Explore verified campuses, exact program fees, and core syllabus structures to make confident academic choices.
         </motion.p>
 
-        {/* Search & Auto-Suggestion Container */}
         <motion.div
           ref={searchContainerRef}
           initial={{ opacity: 0, y: 30 }}
@@ -218,7 +235,6 @@ export const Hero = () => {
             onSubmit={handleSearch}
             className="bg-white p-2.5 rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-200/80 flex flex-col md:flex-row items-center gap-2 relative"
           >
-            {/* Search Input */}
             <div className="flex items-center gap-3 px-4 py-3 w-full md:flex-1 bg-slate-50/80 rounded-2xl border border-slate-100 focus-within:border-blue-300 focus-within:bg-white transition-colors">
               <Search className="text-slate-400 shrink-0" size={20} />
               <input
@@ -249,7 +265,6 @@ export const Hero = () => {
               )}
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-4 rounded-2xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2 shrink-0 text-sm cursor-pointer"
@@ -258,7 +273,6 @@ export const Hero = () => {
             </button>
           </form>
 
-          {/* Auto-Suggestion Dropdown */}
           <AnimatePresence>
             {isDropdownOpen && searchQuery.trim().length > 0 && (
               <motion.div
@@ -344,7 +358,6 @@ export const Hero = () => {
                       })}
                     </ul>
 
-                    {/* View All Results Footer */}
                     <div className="border-t border-slate-100 mt-1 pt-1 px-2">
                       <button
                         type="button"
@@ -370,7 +383,6 @@ export const Hero = () => {
           </AnimatePresence>
         </motion.div>
 
-        {/* Quick Trust Badges / Stats Preview */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -380,7 +392,9 @@ export const Hero = () => {
           <div className="flex items-center justify-center gap-2 text-slate-600 text-sm font-medium">
             <Building2 size={18} className="text-blue-600" />
             <span>
-              {colleges.length > 0 ? `${colleges.length}+ Verified Colleges` : '100+ Verified Colleges'}
+              {safeColleges.length > 0
+                ? `${safeColleges.length}+ Verified Colleges`
+                : '100+ Verified Colleges'}
             </span>
           </div>
           <div className="flex items-center justify-center gap-2 text-slate-600 text-sm font-medium">
