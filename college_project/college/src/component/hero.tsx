@@ -17,14 +17,25 @@ export interface College {
   id?: string | number;
   _id?: string;
   slug?: string;
-  name: string;
+  name?: string;
+  collegeName?: string;
+  title?: string;
   location?: string;
   address?: string;
   affiliation?: string;
-  courses?: string[];
+  courses?: Array<string | { name?: string; title?: string }>;
 }
 
-const COLLEGE_API_URL = import.meta.env.VITE_APP_API_URL;
+const rawEnvUrl =
+  import.meta.env.VITE_APP_API_URL
+
+const normalizedBase = rawEnvUrl.replace(/\/+$/, '');
+const COLLEGE_API_URL = normalizedBase.endsWith('/college')
+  ? normalizedBase
+  : `${normalizedBase}/college`;
+
+const getCollegeName = (college: College): string =>
+  college.name || college.collegeName || college.title || '';
 
 const extractCollegeArray = (payload: any): College[] => {
   if (Array.isArray(payload)) return payload;
@@ -67,10 +78,6 @@ export const Hero = () => {
         setIsLoading(true);
         setError(null);
 
-        if (!COLLEGE_API_URL) {
-          throw new Error('VITE_APP_API_URL is not configured');
-        }
-
         const response = await fetch(COLLEGE_API_URL, {
           method: 'GET',
           headers: {
@@ -87,7 +94,7 @@ export const Hero = () => {
         setColleges(extractCollegeArray(result));
       } catch (err: any) {
         if (err.name !== 'AbortError') {
-          console.error('Error fetching colleges:', err);
+          console.error('Error fetching colleges from:', COLLEGE_API_URL, err);
           setError('Could not load colleges from server.');
           setColleges([]);
         }
@@ -113,20 +120,25 @@ export const Hero = () => {
       .filter((college) => {
         if (!college || typeof college !== 'object') return false;
 
-        const matchName = college.name?.toLowerCase().includes(query);
-        const matchLocation = (college.location || college.address)
-          ?.toLowerCase()
-          .includes(query);
-        const matchAffiliation = college.affiliation?.toLowerCase().includes(query);
+        const name = getCollegeName(college).toLowerCase();
+        const location = (college.location || college.address || '').toLowerCase();
+        const affiliation = (college.affiliation || '').toLowerCase();
         const matchCourses = Array.isArray(college.courses)
-          ? college.courses.some((course) =>
-              typeof course === 'string'
-                ? course.toLowerCase().includes(query)
-                : (course as any)?.name?.toLowerCase().includes(query)
-            )
+          ? college.courses.some((course) => {
+              const courseLabel =
+                typeof course === 'string'
+                  ? course
+                  : course?.name || course?.title || '';
+              return courseLabel.toLowerCase().includes(query);
+            })
           : false;
 
-        return Boolean(matchName || matchLocation || matchAffiliation || matchCourses);
+        return (
+          name.includes(query) ||
+          location.includes(query) ||
+          affiliation.includes(query) ||
+          matchCourses
+        );
       })
       .slice(0, 6);
   }, [searchQuery, safeColleges]);
@@ -168,7 +180,7 @@ export const Hero = () => {
 
   const handleSelectCollege = (college: College) => {
     const identifier = college.slug || college._id || college.id;
-    setSearchQuery(college.name);
+    setSearchQuery(getCollegeName(college));
     setIsDropdownOpen(false);
     navigate(`/college/${identifier}`);
   };
@@ -301,6 +313,7 @@ export const Hero = () => {
                         const isHighlighted = index === activeIndex;
                         const itemKey = college._id || college.id || index;
                         const collegeLocation = college.location || college.address;
+                        const displayName = getCollegeName(college);
 
                         return (
                           <li key={itemKey} role="option" aria-selected={isHighlighted}>
@@ -324,7 +337,7 @@ export const Hero = () => {
                                 </div>
                                 <div className="min-w-0">
                                   <p className="text-sm font-bold text-slate-900 truncate">
-                                    {college.name}
+                                    {displayName}
                                   </p>
                                   {(collegeLocation || college.affiliation) && (
                                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5 text-xs text-slate-500">
